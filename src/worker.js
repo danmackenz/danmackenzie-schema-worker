@@ -7,7 +7,6 @@ const ORG_ID = `${SITE_URL}/#organization`;
 const SITE_ID = `${SITE_URL}/#website`;
 
 // ---------- Sitewide Organization ----------
-// Production logo configured below. Verify the sameAs list is accurate before first production deploy.
 function buildOrganization() {
   return {
     "@type": "Organization",
@@ -88,6 +87,13 @@ const routeMap = {
   "/accessibility-statement": { type: "WebPage", name: "Accessibility Statement", parent: "/policies" }
 };
 
+// ---------- Route resolver (handles trailing slash + raw/normalized paths) ----------
+function resolveRoute(pathname) {
+  const rawPath = pathname || "/";
+  const normalizedPath = rawPath === "/" ? "/" : rawPath.replace(/\/+$/, "");
+  return routeMap[rawPath] || routeMap[normalizedPath] || null;
+}
+
 // ---------- Breadcrumb builder (walks parent chain) ----------
 function buildBreadcrumb(path) {
   const chain = [];
@@ -135,7 +141,6 @@ function buildPageNode(path, route) {
   if (route.type === "Service") {
     node.provider = { "@id": ORG_ID };
     node.areaServed = "GB";
-    // serviceType is populated from the route name (safe source present in routeMap)
     node.serviceType = route.name;
   }
   if (route.type === "ImageGallery" || route.type === "CollectionPage") {
@@ -149,12 +154,12 @@ function buildPageNode(path, route) {
   return node;
 }
 
-// ---------- Full JSON-LD graph for a given path ----------
-function buildSchemaGraph(path) {
-  const normalizedPath = path === "" ? "/" : path;
-  const route = routeMap[normalizedPath];
-
+// ---------- Full JSON-LD graph for a given pathname ----------
+function buildSchemaGraph(pathname) {
+  const route = resolveRoute(pathname);
   if (!route) return null; // no schema for unmapped routes
+
+  const normalizedPath = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
 
   const graph = [
     buildOrganization(),
@@ -188,7 +193,7 @@ class HeadInjector {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const path = url.pathname.replace(/\/$/, "") || "/";
+    const pathname = url.pathname || "/";
 
     // Fetch original response from origin (Pixieset)
     const originResponse = await fetch(request);
@@ -200,14 +205,20 @@ export default {
       return originResponse; // pass through non-HTML or non-2xx responses untouched
     }
 
-    const jsonLd = buildSchemaGraph(path);
+    const jsonLd = buildSchemaGraph(pathname);
 
     if (!jsonLd) {
       return originResponse; // no matching route, serve unmodified
     }
 
-    return new HTMLRewriter()
+    const rewritten = new HTMLRewriter()
       .on("head", new HeadInjector(jsonLd))
       .transform(originResponse);
+
+    // Temporary debug header — confirms this Worker handled the request.
+    // Remove once JSON-LD injection is confirmed working live.
+    const response = new Response(rewritten.body, rewritten);
+    response.headers.set("x-schema-worker", "active");
+    return response;
   }
 };
