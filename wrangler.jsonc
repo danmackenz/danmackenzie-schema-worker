@@ -3,10 +3,104 @@
   "name": "danmackenzie-schema-worker",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-29",
-  "workers_dev": true
+  "account_id": "2fdcc98c05e5139d580ede372c1a94d8",
+  "workers_dev": true,
+  "preview_urls": true,
 
-  // For CLI / CI deployments uncomment and set the following values.
-  // Do NOT commit real account_id values to public repos. Prefer secrets in CI.
-  // "account_id": "your-cloudflare-account-id",
-  // "routes": ["www.danmackenzie.co.uk/*"]
+  "routes": [
+    {
+      "pattern": "www.danmackenzie.co.uk/*",
+      "zone_name": "danmackenzie.co.uk"
+    }
+  ],
+
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+
+  "vars": {
+    "SITE_HOST": "www.danmackenzie.co.uk",
+    "SITE_URL": "https://www.danmackenzie.co.uk",
+    "ASSETS_URL": "https://assets.danmackenzie.co.uk",
+    "LOGO_URL": "https://assets.danmackenzie.co.uk/Logos/DM_Logo_FB.png"
+  },
+
+  "env": {
+    "staging": {
+      "name": "danmackenzie-schema-worker-staging",
+      "workers_dev": true,
+      "preview_urls": true,
+      "routes": [
+        {
+          "pattern": "staging.danmackenzie.co.uk/*",
+          "zone_name": "danmackenzie.co.uk"
+        }
+      ],
+      "vars": {
+        "SITE_HOST": "staging.danmackenzie.co.uk",
+        "SITE_URL": "https://staging.danmackenzie.co.uk",
+        "ASSETS_URL": "https://assets.danmackenzie.co.uk",
+        "LOGO_URL": "https://assets.danmackenzie.co.uk/Logos/DM_Logo_FB.png"
+      },
+      "observability": {
+        "enabled": false,
+        "head_sampling_rate": 1,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      }
+    },
+    "production": {
+      "name": "danmackenzie-schema-worker-production",
+      "workers_dev": true,
+      "preview_urls": true,
+      "routes": [
+        {
+          "pattern": "www.danmackenzie.co.uk/*",
+          "zone_name": "danmackenzie.co.uk"
+        }
+      ],
+      "vars": {
+        "SITE_HOST": "www.danmackenzie.co.uk",
+        "SITE_URL": "https://www.danmackenzie.co.uk",
+        "ASSETS_URL": "https://assets.danmackenzie.co.uk",
+        "LOGO_URL": "https://assets.danmackenzie.co.uk/Logos/DM_Logo_FB.png"
+      },
+      "observability": {
+        "enabled": false,
+        "head_sampling_rate": 1,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      }
+    }
+  }
 }
