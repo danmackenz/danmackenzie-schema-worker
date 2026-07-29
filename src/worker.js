@@ -17,8 +17,8 @@ function buildOrganization() {
     "logo": "https://assets.danmackenzie.co.uk/Logos/DM_Logo_FB.png",
     "description": "A thoughtful creative practice offering photography, digital support, and AI automation for founder-led brands and individuals.",
     "sameAs": [
-      "https://www.instagram.com/danmackenziephoto",
-      "https://www.linkedin.com/in/danmackenzie"
+      "https://www.instagram.com/danmackenz",
+      "https://www.linkedin.com/in/danmacknzie"
     ],
     "areaServed": "GB",
     "address": {
