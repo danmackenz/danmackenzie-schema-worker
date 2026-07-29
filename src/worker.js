@@ -215,10 +215,7 @@ export default {
       .on("head", new HeadInjector(jsonLd))
       .transform(originResponse);
 
-    // Temporary debug header — confirms this Worker handled the request.
-    // Remove once JSON-LD injection is confirmed working live.
-    const response = new Response(rewritten.body, rewritten);
-    response.headers.set("x-schema-worker", "active");
+    
     return response;
   }
 };
