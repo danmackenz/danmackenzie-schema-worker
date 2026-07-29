@@ -192,17 +192,20 @@ class HeadInjector {
 // ---------- Main fetch handler ----------
 export default {
   async fetch(request, env, ctx) {
+    ctx.passThroughOnException();
+
     const url = new URL(request.url);
     const pathname = url.pathname || "/";
 
     // Fetch original response from origin (Pixieset)
     const originResponse = await fetch(request);
 
-    // Only operate on successful HTML responses from origin (avoid injecting into error pages)
+    // Only operate on successful HTML responses from origin
     const status = originResponse.status || 0;
     const contentType = originResponse.headers.get("content-type") || "";
+
     if (status < 200 || status >= 300 || !contentType.includes("text/html")) {
-      return originResponse; // pass through non-HTML or non-2xx responses untouched
+      return originResponse; // pass through non-HTML or non-2xx untouched
     }
 
     const jsonLd = buildSchemaGraph(pathname);
@@ -211,11 +214,8 @@ export default {
       return originResponse; // no matching route, serve unmodified
     }
 
-    const rewritten = new HTMLRewriter()
+    return new HTMLRewriter()
       .on("head", new HeadInjector(jsonLd))
       .transform(originResponse);
-
-    
-    return response;
   }
 };
