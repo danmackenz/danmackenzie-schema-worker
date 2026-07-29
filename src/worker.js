@@ -104,7 +104,7 @@ function buildBreadcrumb(path) {
     seen.add(current);
     chain.unshift({
       name: routeMap[current].name,
-      url: current === "/" ? `${SITE_URL}/` : `${SITE_URL}${current}`
+      url: current === "/" ? `${SITE_URL}/` : `${SITE_URL}${current}/`
     });
     current = routeMap[current].parent;
   }
@@ -127,7 +127,7 @@ function buildBreadcrumb(path) {
 
 // ---------- Page node builder ----------
 function buildPageNode(path, route) {
-  const url = path === "/" ? `${SITE_URL}/` : `${SITE_URL}${path}`;
+  const url = path === "/" ? `${SITE_URL}/` : `${SITE_URL}${path}/`;
   const node = {
     "@type": route.type,
     "@id": `${url}#webpage`,
