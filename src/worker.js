@@ -7,13 +7,14 @@ const ORG_ID = `${SITE_URL}/#organization`;
 const SITE_ID = `${SITE_URL}/#website`;
 
 // ---------- Sitewide Organization ----------
+// Production logo configured below. Verify the sameAs list is accurate before first production deploy.
 function buildOrganization() {
   return {
     "@type": "Organization",
     "@id": ORG_ID,
     "name": "Dan Mackenzie",
     "url": SITE_URL,
-    "logo": `${SITE_URL}/assets/logo.png`,
+    "logo": "https://assets.danmackenzie.co.uk/Logos/DM_Logo_FB.png",
     "description": "A thoughtful creative practice offering photography, digital support, and AI automation for founder-led brands and individuals.",
     "sameAs": [
       "https://www.instagram.com/danmackenziephoto",
@@ -134,12 +135,15 @@ function buildPageNode(path, route) {
   if (route.type === "Service") {
     node.provider = { "@id": ORG_ID };
     node.areaServed = "GB";
+    // serviceType is populated from the route name (safe source present in routeMap)
+    node.serviceType = route.name;
   }
   if (route.type === "ImageGallery" || route.type === "CollectionPage") {
     node.isPartOf = { "@id": SITE_ID };
   }
   if (route.type === "Blog") {
     node.publisher = { "@id": ORG_ID };
+    // TODO: add author, datePublished, image when post metadata is available from origin
   }
 
   return node;
@@ -172,7 +176,9 @@ class HeadInjector {
   }
   element(element) {
     if (this.jsonLd) {
-      const scriptTag = `<script type="application/ld+json">${JSON.stringify(this.jsonLd)}</script>`;
+      // Safely serialize JSON-LD and escape closing script sequences to avoid prematurely terminating the script tag
+      const jsonText = JSON.stringify(this.jsonLd).replace(/<\/script>/gi, '\\u003C/script>');
+      const scriptTag = `<script type="application/ld+json">${jsonText}</script>`;
       element.append(scriptTag, { html: true });
     }
   }
@@ -187,9 +193,11 @@ export default {
     // Fetch original response from origin (Pixieset)
     const originResponse = await fetch(request);
 
+    // Only operate on successful HTML responses from origin (avoid injecting into error pages)
+    const status = originResponse.status || 0;
     const contentType = originResponse.headers.get("content-type") || "";
-    if (!contentType.includes("text/html")) {
-      return originResponse; // pass through non-HTML assets untouched
+    if (status < 200 || status >= 300 || !contentType.includes("text/html")) {
+      return originResponse; // pass through non-HTML or non-2xx responses untouched
     }
 
     const jsonLd = buildSchemaGraph(path);

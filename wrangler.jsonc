@@ -3,5 +3,10 @@
   "name": "danmackenzie-schema-worker",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-29",
-  "workers_dev": true
+  "workers_dev": true,
+
+  // For CLI / CI deployments uncomment and set the following values.
+  // Do NOT commit real account_id values to public repos. Prefer secrets in CI.
+  // "account_id": "your-cloudflare-account-id",
+  // "routes": ["www.danmackenzie.co.uk/*"]
 }
